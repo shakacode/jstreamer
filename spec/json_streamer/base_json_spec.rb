@@ -12,9 +12,17 @@ describe JsonStreamer::BaseJson do
   end
 
   describe ".generate" do
-    it "wraps generation calls and return json string" do
+    it "generates object to json string" do
       expect(basic_template.generate(1)).to eq(<<~JSON)
         {"abc":1}
+      JSON
+    end
+  end
+
+  describe ".generate_collection" do
+    it "generates collection to json string" do
+      expect(basic_template.generate_collection([1, 2])).to eq(<<~JSON)
+        [{"abc":1},{"abc":2}]
       JSON
     end
   end
@@ -50,22 +58,15 @@ describe JsonStreamer::BaseJson do
         {"abc":1}
       JSON
     end
+  end
 
+  describe "#call_collection" do
     it "executes template for collection of objects" do
-      result = basic_template.new.call([1, 2])
+      result = basic_template.new.call_collection([1, 2])
 
       expect(result).to be_a(described_class)
       expect(result.to_s).to eq(<<~JSON)
         [{"abc":1},{"abc":2}]
-      JSON
-    end
-
-    it "merges options" do
-      result = basic_template.new(option1: 1, option2: 2).call(123, option2: :new, option3: 3)
-
-      expect(result.options).to eq(option1: 1, option2: :new, option3: 3)
-      expect(result.to_s).to eq(<<~JSON)
-        {"abc":123}
       JSON
     end
   end
@@ -280,6 +281,21 @@ describe JsonStreamer::BaseJson do
           {"as_block":{"abc":0},"as_method":{"xyz":0}}
         JSON
       end
+
+      it "renders empty" do
+        template = Class.new(described_class) do
+          def render
+            object(:as_block) {} # rubocop:disable Lint/EmptyBlock
+            object(:as_method)
+          end
+
+          def as_method; end
+        end
+
+        expect(template.generate).to eq(<<~JSON)
+          {"as_block":{},"as_method":{}}
+        JSON
+      end
     end
 
     describe "#merge_json" do
@@ -312,71 +328,44 @@ describe JsonStreamer::BaseJson do
     end
 
     describe "#partial" do
-      let(:model_partial) do
-        Class.new(described_class) do
-          def render
-            prop(:xyz, current_model[:items])
-          end
-        end
-      end
-
-      before do
-        stub_const("ItemPartial", basic_template)
-        stub_const("ModelPartial", model_partial)
-      end
-
-      it "renders partial as method" do
-        template = Class.new(described_class) do
-          def render
-            partial(:items)
-          end
-
-          def items(stream)
-            ItemPartial.new(stream).call([1, 2])
-          end
-        end
-
-        expect(template.generate({ items: [1, 2] })).to eq(<<~JSON)
-          {"items":[{"abc":1},{"abc":2}]}
-        JSON
-      end
-
-      it "renders partial as block" do
-        template = Class.new(described_class) do
-          def render
-            partial(:items) do |stream|
-              ItemPartial.new(stream).call([1, 2])
-            end
-          end
-        end
-
-        expect(template.generate({ items: [1, 2] })).to eq(<<~JSON)
-          {"items":[{"abc":1},{"abc":2}]}
-        JSON
-      end
+      before { stub_const("ItemPartial", basic_template) }
 
       it "renders partial as class" do
         template = Class.new(described_class) do
           def render
-            partial(:items, ModelPartial)
+            partial(:items, ItemPartial)
           end
         end
 
-        expect(template.generate({ items: [1, 2] })).to eq(<<~JSON)
-          {"items":{"xyz":[1,2]}}
+        expect(template.generate(123)).to eq(<<~JSON)
+          {"items":{"abc":123}}
         JSON
       end
 
-      it "renders partial as class with items" do
+      it "renders partial as class array" do
         template = Class.new(described_class) do
           def render
-            partial(:items, ItemPartial, current_model[:items])
+            partial(:items, [ItemPartial])
           end
         end
 
-        expect(template.generate({ items: [1, 2] })).to eq(<<~JSON)
-          {"items":[{"abc":1},{"abc":2}]}
+        expect(template.generate([1, 2, 3])).to eq(<<~JSON)
+          {"items":[{"abc":1},{"abc":2},{"abc":3}]}
         JSON
+      end
+
+      it "caches locally" do
+        template = Class.new(described_class) do
+          def render
+            partial(:items, ItemPartial, cache_key: current_model)
+          end
+        end
+        allow(ItemPartial).to receive(:new).and_call_original
+
+        expect(template.generate_collection([1, 2, 1, 1, 2])).to eq(<<~JSON)
+          [{"items":{"abc":1}},{"items":{"abc":2}},{"items":{"abc":1}},{"items":{"abc":1}},{"items":{"abc":2}}]
+        JSON
+        expect(ItemPartial).to have_received(:new).exactly(2).times
       end
     end
 
@@ -419,9 +408,14 @@ describe JsonStreamer::BaseJson do
       end
 
       it "renders" do
-        model = { items: [1, 2] }
-        expect(template.generate(model)).to eq(<<~JSON)
+        expect(template.generate({ items: [1, 2] })).to eq(<<~JSON)
           {"as_block":[{"abc":1},{"abc":2}],"as_method":[{"xyz":1},{"xyz":2}]}
+        JSON
+      end
+
+      it "renders empty" do
+        expect(template.generate({ items: [] })).to eq(<<~JSON)
+          {"as_block":[],"as_method":[]}
         JSON
       end
     end

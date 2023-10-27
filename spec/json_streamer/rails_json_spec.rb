@@ -24,8 +24,18 @@ describe JsonStreamer::RailsJson do
       JSON
     end
 
+    it "passes options" do
+      template.render(123, view_context:, view: :api)
+
+      expect(controller).to have_received(:render).with(json: <<~JSON)
+        {"abc":123,"api":true}
+      JSON
+    end
+  end
+
+  describe ".render_collection" do
     it "renders collection" do
-      template.render([1, 2, 3], view_context:)
+      template.render_collection([1, 2, 3], view_context:)
 
       expect(controller).to have_received(:render).with(json: <<~JSON)
         [{"abc":1},{"abc":2},{"abc":3}]
@@ -33,10 +43,10 @@ describe JsonStreamer::RailsJson do
     end
 
     it "passes options" do
-      template.render(123, view_context:, view: :api)
+      template.render_collection([1, 2], view_context:, view: :api)
 
       expect(controller).to have_received(:render).with(json: <<~JSON)
-        {"abc":123,"api":true}
+        [{"abc":1,"api":true},{"abc":2,"api":true}]
       JSON
     end
   end

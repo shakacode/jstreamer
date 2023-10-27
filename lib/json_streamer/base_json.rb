@@ -2,19 +2,22 @@
 
 module JsonStreamer
   class BaseJson # rubocop:todo Metrics/ClassLength
-    # include ScoutApm::Tracer if defined?(ScoutApm)
-
     NO_ARGUMENT = Object.new
 
+    # TODO: add Scout instrumentation
+    # include ScoutApm::Tracer
+    # def self.generate(obj = NO_ARGUMENT, **opts)
+    #   instrument("JsonStreamer", name) do
+    #     new(**opts).call(obj).to_s
+    #   end
+    # end
+
     def self.generate(obj = NO_ARGUMENT, **opts)
-      # if defined?(ScoutApm)
-      #   instrument("JsonStreamer", name) do
-      #     new(**opts).call(obj).to_s
-      #   end
-      # else
-      #  new(**opts).call(obj).to_s
-      # end
       new(**opts).call(obj).to_s
+    end
+
+    def self.generate_collection(collection, **opts)
+      new(**opts).call_collection(collection).to_s
     end
 
     def self.delegated_options(*opts)
@@ -26,14 +29,26 @@ module JsonStreamer
     def initialize(stream = nil, **opts)
       @current_stream = stream || create_new_stream
       @options = opts
-      @reusable_cache = {}
+      @local_cache = {}
     end
 
     attr_reader :current_model, :current_stream, :index, :options
 
-    def call(obj = NO_ARGUMENT, **opts)
-      @options.merge!(opts)
-      object_is_collection?(obj) ? render_collection(obj) : render_single(obj)
+    def call(obj = NO_ARGUMENT)
+      @current_model = obj
+      current_stream.push_object
+      render
+      current_stream.pop
+      self
+    end
+
+    def call_collection(collection)
+      current_stream.push_array
+      collection.each_with_index do |obj, index|
+        @index = index
+        call(obj)
+      end
+      current_stream.pop
       self
     end
 
@@ -88,28 +103,36 @@ module JsonStreamer
 
     def partial( # rubocop:disable Metrics/ParameterLists, Metrics/AbcSize, Metrics/MethodLength
       key,
-      klass = NO_ARGUMENT,
+      klass,
       klass_obj = NO_ARGUMENT,
-      reuse_by: nil,
-      cache_by: nil,
+      cache_key: nil,
+      cache_type: :local,
       **klass_opts,
       &block
     )
       normalized_key = normalized_key(key)
       current_stream.push_key(normalized_key)
 
-      if !cache_by.nil?
-        result = Rails.cache.fetch(cache_by) do
-          execute_partial(key, create_new_stream, klass, klass_obj, **klass_opts, &block).to_s
-        end
-        current_stream.push_json(result)
-      elsif !reuse_by.nil?
-        result = (@reusable_cache[normalized_key] ||= {})[reuse_by] ||=
-          execute_partial(key, create_new_stream, klass, klass_obj, **klass_opts, &block).to_s
-        current_stream.push_json(result)
-      else
-        execute_partial(key, current_stream, klass, klass_obj, **klass_opts, &block)
+      if cache_key.nil?
+        execute_partial(current_stream, klass, klass_obj, **klass_opts, &block)
+        return
       end
+
+      cache_result =
+        case cache_type
+        when :local
+          @local_cache[normalized_key] ||= {}
+          @local_cache[normalized_key][cache_key] ||=
+            execute_partial(create_new_stream, klass, klass_obj, **klass_opts, &block).to_s.chomp
+        when :rails
+          Rails.cache.fetch(cache_key) do
+            execute_partial(create_new_stream, klass, klass_obj, **klass_opts, &block).to_s.chomp
+          end
+        else
+          raise "Unknown cache_type #{cache_type}"
+        end
+
+      current_stream.push_json(cache_result)
     end
 
     def view?(*views)
@@ -128,37 +151,22 @@ module JsonStreamer
 
     private
 
-    ### private-private
-
     def create_new_stream
-      Oj::StringWriter.new
+      JsonStreamer.create_new_stream
     end
 
-    def execute_partial(key, stream, klass, klass_obj, **klass_opts)
-      if klass != NO_ARGUMENT
-        klass_obj = current_model if klass_obj == NO_ARGUMENT
-        klass.new(stream).call(klass_obj, **klass_opts)
-      elsif block_given?
-        yield(stream)
+    def execute_partial(stream, klass, klass_obj, **klass_opts, &block)
+      if block
+        klass_obj = yield
+      elsif klass_obj == NO_ARGUMENT
+        klass_obj = current_model
+      end
+
+      if klass.is_a?(Array)
+        klass.first.new(stream, **klass_opts).call_collection(klass_obj)
       else
-        __send__(key, stream)
+        klass.new(stream, **klass_opts).call(klass_obj)
       end
-    end
-
-    def render_single(obj)
-      @current_model = obj
-      current_stream.push_object
-      render
-      current_stream.pop
-    end
-
-    def render_collection(collection)
-      current_stream.push_array
-      collection.each_with_index do |obj, index|
-        @index = index
-        render_single(obj)
-      end
-      current_stream.pop
     end
 
     def normalized_keys
@@ -181,12 +189,6 @@ module JsonStreamer
       when Time then value.strftime("%FT%T.%L%:z")
       else raise("Unsupported json encode class #{value.class}")
       end
-    end
-
-    def object_is_collection?(obj)
-      obj.is_a?(Array) ||
-        (defined?(ActiveRecord) &&
-        (obj.is_a?(ActiveRecord::Associations::CollectionProxy) || obj.is_a?(ActiveRecord::Relation)))
     end
   end
 end

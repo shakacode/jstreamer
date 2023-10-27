@@ -6,6 +6,10 @@ module JsonStreamer
       opts.fetch(:view_context).controller.render(json: generate(obj, **opts))
     end
 
+    def self.render_collection(collection, **opts)
+      opts.fetch(:view_context).controller.render(json: generate_collection(collection, **opts))
+    end
+
     # NOTE: useful view_context injection discussion
     # https://github.com/drapergem/draper/issues/124
     def view_context
