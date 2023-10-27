@@ -1,0 +1,31 @@
+require:
+  - rubocop-rails
+  - rubocop-rake
+  - rubocop-rspec
+  - rubocop-performance
+  - rubocop-thread_safety
+
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/**_spec.rb
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+
