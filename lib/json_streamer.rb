@@ -9,7 +9,9 @@ require "json_streamer/rails_json"
 module JsonStreamer
   module_function
 
-  def generate(template, object = BaseJson::NO_ARGUMENT, **options)
+  class Error < StandardError; end
+
+  def generate(template, object = nil, **options)
     if template.is_a?(Array)
       template.first.generate_collection(object, **options)
     else

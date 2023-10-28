@@ -2,7 +2,7 @@
 
 module JsonStreamer
   class RailsJson < BaseJson
-    def self.render(obj = self::NO_ARGUMENT, **opts)
+    def self.render(obj = nil, **opts)
       opts.fetch(:view_context).controller.render(json: generate(obj, **opts))
     end
 
@@ -19,7 +19,7 @@ module JsonStreamer
     def method_missing(method, ...)
       return super if view_context.nil? || !view_context.respond_to?(method)
 
-      # analogue of self.class.delegate(method, to: :view_context)
+      # TODO: analogue of self.class.delegate(method, to: :view_context)
       self.class.define_method(method) do |*args|
         view_context.__send__(method, *args)
       end

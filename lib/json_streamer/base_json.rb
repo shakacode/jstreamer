@@ -2,8 +2,6 @@
 
 module JsonStreamer
   class BaseJson # rubocop:todo Metrics/ClassLength
-    NO_ARGUMENT = Object.new
-
     # TODO: add Scout instrumentation
     # include ScoutApm::Tracer
     # def self.generate(obj = NO_ARGUMENT, **opts)
@@ -12,7 +10,7 @@ module JsonStreamer
     #   end
     # end
 
-    def self.generate(obj = NO_ARGUMENT, **opts)
+    def self.generate(obj = nil, **opts)
       new(**opts).call(obj).to_s
     end
 
@@ -34,7 +32,7 @@ module JsonStreamer
 
     attr_reader :current_model, :current_stream, :index, :options
 
-    def call(obj = NO_ARGUMENT)
+    def call(obj = nil)
       @current_model = obj
       current_stream.push_object
       render
@@ -101,38 +99,25 @@ module JsonStreamer
       current_stream.push_json(value, key)
     end
 
-    def partial( # rubocop:disable Metrics/ParameterLists, Metrics/AbcSize, Metrics/MethodLength
-      key,
-      klass,
-      klass_obj = NO_ARGUMENT,
-      cache_key: nil,
-      cache_type: :local,
-      **klass_opts,
-      &block
-    )
+    def partial(key, klass, klass_obj, **klass_opts) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
       normalized_key = normalized_key(key)
       current_stream.push_key(normalized_key)
 
-      if cache_key.nil?
-        execute_partial(current_stream, klass, klass_obj, **klass_opts, &block)
-        return
+      cache_key = klass_opts.delete(:cache_key)
+      cache_type = klass_opts.delete(:cache_type)
+      raise(JsonStreamer::Error, "No cache_key provided") if cache_type && cache_key.nil?
+      raise(JsonStreamer::Error, "No cache_type provided") if cache_key && cache_type.nil?
+
+      case cache_type
+      when :local
+        execute_partial_with_local_caching(normalized_key, cache_key, klass, klass_obj, **klass_opts)
+      when :rails
+        execute_partial_with_rails_caching(cache_key, klass, klass_obj, **klass_opts)
+      when nil
+        execute_partial_directly(current_stream, klass, klass_obj, **klass_opts)
+      else
+        raise(JsonStreamer::Error, "Unknown cache_type: #{cache_type}")
       end
-
-      cache_result =
-        case cache_type
-        when :local
-          @local_cache[normalized_key] ||= {}
-          @local_cache[normalized_key][cache_key] ||=
-            execute_partial(create_new_stream, klass, klass_obj, **klass_opts, &block).to_s.chomp
-        when :rails
-          Rails.cache.fetch(cache_key) do
-            execute_partial(create_new_stream, klass, klass_obj, **klass_opts, &block).to_s.chomp
-          end
-        else
-          raise "Unknown cache_type #{cache_type}"
-        end
-
-      current_stream.push_json(cache_result)
     end
 
     def view?(*views)
@@ -155,18 +140,28 @@ module JsonStreamer
       JsonStreamer.create_new_stream
     end
 
-    def execute_partial(stream, klass, klass_obj, **klass_opts, &block)
-      if block
-        klass_obj = yield
-      elsif klass_obj == NO_ARGUMENT
-        klass_obj = current_model
-      end
+    def execute_partial_directly(stream, klass, klass_obj, **klass_opts)
+      klass_obj = klass_obj.call if klass_obj.is_a?(Proc)
 
       if klass.is_a?(Array)
         klass.first.new(stream, **klass_opts).call_collection(klass_obj)
       else
         klass.new(stream, **klass_opts).call(klass_obj)
       end
+    end
+
+    def execute_partial_with_local_caching(normalized_key, cache_key, klass, klass_obj, **klass_opts)
+      @local_cache[normalized_key] ||= {}
+      @local_cache[normalized_key][cache_key] ||=
+        execute_partial_directly(create_new_stream, klass, klass_obj, **klass_opts).to_s.chomp
+      current_stream.push_json(@local_cache[normalized_key][cache_key])
+    end
+
+    def execute_partial_with_rails_caching(cache_key, klass, klass_obj, **klass_opts)
+      result = Rails.cache.fetch(cache_key) do
+        execute_partial_directly(create_new_stream, klass, klass_obj, **klass_opts).to_s.chomp
+      end
+      current_stream.push_json(result)
     end
 
     def normalized_keys
@@ -178,7 +173,7 @@ module JsonStreamer
     end
 
     def transform_key(key)
-      key.instance_of?(Symbol) ? key.to_s.tr("?!", "") : raise("keys should be Symbols only")
+      key.instance_of?(Symbol) ? key.to_s.tr("?!", "") : raise(JsonStreamer::Error, "Keys should be Symbols only")
     end
 
     def encode_value(value)
@@ -187,7 +182,7 @@ module JsonStreamer
       when Integer, Float, TrueClass, FalseClass, NilClass then value
       when Date then value.strftime("%F")
       when Time then value.strftime("%FT%T.%L%:z")
-      else raise("Unsupported json encode class #{value.class}")
+      else raise(JsonStreamer::Error, "Unsupported json encode class #{value.class}")
       end
     end
   end

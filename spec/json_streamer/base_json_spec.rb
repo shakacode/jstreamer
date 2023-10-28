@@ -131,10 +131,10 @@ describe JsonStreamer::BaseJson do
 
       it "unsupported types" do
         expect { basic_template.generate(:some) }.
-          to raise_error(RuntimeError, "Unsupported json encode class Symbol")
+          to raise_error(JsonStreamer::Error, "Unsupported json encode class Symbol")
 
         expect { basic_template.generate(BigDecimal("1")) }.
-          to raise_error(RuntimeError, "Unsupported json encode class BigDecimal")
+          to raise_error(JsonStreamer::Error, "Unsupported json encode class BigDecimal")
       end
 
       it "custom override" do
@@ -333,7 +333,7 @@ describe JsonStreamer::BaseJson do
       it "renders partial as class" do
         template = Class.new(described_class) do
           def render
-            partial(:items, ItemPartial)
+            partial(:items, ItemPartial, current_model)
           end
         end
 
@@ -345,7 +345,7 @@ describe JsonStreamer::BaseJson do
       it "renders partial as class array" do
         template = Class.new(described_class) do
           def render
-            partial(:items, [ItemPartial])
+            partial(:items, [ItemPartial], current_model)
           end
         end
 
@@ -354,10 +354,10 @@ describe JsonStreamer::BaseJson do
         JSON
       end
 
-      it "caches locally" do
+      it "caches locally (with data as lambda)" do
         template = Class.new(described_class) do
           def render
-            partial(:items, ItemPartial, cache_key: current_model)
+            partial(:items, ItemPartial, -> { current_model }, cache_key: current_model, cache_type: :local)
           end
         end
         allow(ItemPartial).to receive(:new).and_call_original
