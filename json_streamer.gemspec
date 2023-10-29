@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.author      = "Sergey Tarasov"
   spec.email       = "sergey@shakacode.com"
 
-  spec.summary     = "JSON Streamer"
-  spec.description = "JSON streaming generator"
+  spec.summary     = "JSON Streamer - renders JSON directly to a stream from ruby templates"
+  spec.description = "JSON Streamer - renders JSON directly to a stream from ruby templates"
   spec.homepage    = "https://github.com/shakacode/json_streamer"
   spec.license     = "MIT"
 

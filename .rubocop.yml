@@ -4,6 +4,7 @@ require:
   - rubocop-rspec
   - rubocop-performance
   - rubocop-thread_safety
+  - rubocop-yard
 
 AllCops:
   TargetRubyVersion: 3.1
@@ -20,9 +21,6 @@ RSpec/ExampleLength:
   Enabled: false
 
 RSpec/MultipleExpectations:
-  Enabled: false
-
-Style/Documentation:
   Enabled: false
 
 Style/StringLiterals:

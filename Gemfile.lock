@@ -30,6 +30,7 @@ GEM
     racc (1.7.1)
     rack (2.2.8)
     rainbow (3.1.1)
+    rake (11.3.0)
     regexp_parser (2.8.2)
     rexml (3.2.6)
     rspec (3.12.0)
@@ -77,10 +78,14 @@ GEM
       rubocop-factory_bot (~> 2.22)
     rubocop-thread_safety (0.5.1)
       rubocop (>= 0.90.0)
+    rubocop-yard (0.7.0)
+      rubocop
+      yard
     ruby-progressbar (1.13.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
+    yard (0.9.34)
 
 PLATFORMS
   ruby
@@ -88,6 +93,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   json_streamer!
+  rake
   rspec
   rubocop
   rubocop-performance
@@ -95,6 +101,8 @@ DEPENDENCIES
   rubocop-rake
   rubocop-rspec
   rubocop-thread_safety
+  rubocop-yard
+  yard
 
 BUNDLED WITH
    2.1.4

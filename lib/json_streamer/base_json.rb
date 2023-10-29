@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module JsonStreamer
+  # Provides main DSL and base class for json rendering.
   class BaseJson # rubocop:todo Metrics/ClassLength
     # TODO: add Scout instrumentation
     # include ScoutApm::Tracer
@@ -10,28 +11,47 @@ module JsonStreamer
     #   end
     # end
 
+    # Generates json for a single object
+    # @param obj [Object, nil]
+    # @param opts [kwargs] options
+    # @return [String] generated json
     def self.generate(obj = nil, **opts)
       new(**opts).call(obj).to_s
     end
 
+    # Generates json for a collection of objects
+    # @param collection [Array]
+    # @param opts [kwargs] options
+    # @return [String] generated json
     def self.generate_collection(collection, **opts)
       new(**opts).call_collection(collection).to_s
     end
 
-    def self.delegated_options(*opts)
-      opts.each do |opt|
-        define_method(opt) { options.fetch(opt) }
-      end
-    end
-
+    # Initializer
+    # @param stream [stream]
+    # @param opts [kwargs]
     def initialize(stream = nil, **opts)
       @current_stream = stream || create_new_stream
       @options = opts
       @local_cache = {}
+      @index = nil
     end
 
-    attr_reader :current_model, :current_stream, :index, :options
+    # @return [Object, nil] current model (data object) passed to the renderer
+    attr_reader :current_model
 
+    # @return [stream] current json stream (low-level)
+    attr_reader :current_stream
+
+    # @return [Integer, nil] index of currently rendering element inside array's rendering loop
+    attr_reader :index
+
+    # @return [Hash] current options passed to the renderer
+    attr_reader :options
+
+    # Performs render for a single object
+    # @param obj [Object] current model
+    # @return self
     def call(obj = nil)
       @current_model = obj
       current_stream.push_object
@@ -40,6 +60,9 @@ module JsonStreamer
       self
     end
 
+    # Performs render for a collection of objects
+    # @param collection [Array]
+    # @return self
     def call_collection(collection)
       current_stream.push_array
       collection.each_with_index do |obj, index|
@@ -50,14 +73,21 @@ module JsonStreamer
       self
     end
 
+    # Returns json string of current object
+    # @return [String]
     def to_s # rubocop:disable Rails/Delegate
       current_stream.to_s
     end
 
-    protected
+    # @!group DSL
 
-    ### DSL
-
+    # Pushes a simple property to a json stream
+    # @param key [Symbol]
+    # @param value [Object]
+    # @return void
+    # @example
+    #   prop(:abc, 123)
+    #   prop(:xyz, "qwerty")
     def prop(key, value)
       key = normalized_key(key)
       if value.is_a?(Array)
@@ -69,6 +99,18 @@ module JsonStreamer
       end
     end
 
+    # Extracts properties from an object or hash and pushes them to a json stream
+    # @param obj [Hash, Object]
+    # @param keys [Array<Symbol>]
+    # @return void
+    # @example With inlined keys
+    #   from(current_model, :method1, :method2)  # calling methods of provided object
+    #   from(some_hash, :prop1, :prop2)          # fetching props of provided hash
+    # @example With keys as array
+    #   PROPS = %i[prop1 prop2]
+    #
+    #   from(some, PROPS)   # pass array directly
+    #   from(some, *PROPS)  # pass array with splat
     def from(obj, *keys)
       from_hash = obj.is_a?(Hash)
       keys = keys[0] if keys[0].is_a?(Array)
@@ -78,12 +120,31 @@ module JsonStreamer
       end
     end
 
+    # Pushes an object to a json stream
+    # @param key [Symbol]
+    # @yield optional block
+    # @return void
+    # @example Object with a block
+    #   object(:object_with_block) do
+    #     prop(:a, 1)
+    #   end
+    # @example Object with helper method
+    #   def render
+    #     object(:object_with_helper_method)
+    #   end
+    #
+    #   def object_with_helper_method
+    #     prop(:a, 1)
+    #   end
     def object(key)
       current_stream.push_object(normalized_key(key))
       block_given? ? yield : __send__(key)
       current_stream.pop
     end
 
+    # Merges a json string to a json stream directly
+    # @param json [String]
+    # @return void
     def merge_json(json)
       return if [nil, "", "{}", "[]"].include?(json)
 
@@ -99,6 +160,11 @@ module JsonStreamer
       current_stream.push_json(value, key)
     end
 
+    # Pushes a partial to a stream
+    # @param key [Symbol]
+    # @param klass [Class] partial class
+    # @param klass_obj [Object] data model passed to a class
+    # @param klass_opts [kwargs] options
     def partial(key, klass, klass_obj, **klass_opts) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
       normalized_key = normalized_key(key)
       current_stream.push_key(normalized_key)
@@ -120,10 +186,36 @@ module JsonStreamer
       end
     end
 
+    # Helper, checks current view(s) by name
+    # @param views [Array<Symbol>] view names
+    # @return [Boolean]
+    # @example
+    #   if view?(:api_v1, :api_v2)        # either of views
+    #     prop(:some_api_only_prop, 1)
+    #   end
     def view?(*views)
       views.include?(options[:view])
     end
 
+    # Pushes an array to a json stream
+    # @param key [Symbol]
+    # @param array_obj [Array]
+    # @yield optional block
+    # @return void
+    # @example Array with a block
+    #   array(:my_items, items) do |item|
+    #     from(item, :a, :b, :c)
+    #     prop(:x, item.d)
+    #   end
+    # @example Array with a helper method
+    #   def render
+    #     array(:my_items, items)
+    #   end
+    #
+    #   def my_items(item)
+    #     from(item, :a, :b, :c)
+    #     prop(:x, item.d)
+    #   end
     def array(key, array_obj)
       current_stream.push_array(normalized_key(key))
       array_obj.each do |obj|
@@ -133,6 +225,71 @@ module JsonStreamer
       end
       current_stream.pop
     end
+
+    # @!endgroup
+
+    # @!group Helpers
+
+    # Simple delegation helper for options as methods
+    # @param opts [Array<Symbol>] option key(s)
+    # @return void
+    # @example
+    #   class SomeMyJson < ApplicationJson
+    #     delegated_options :slug
+    #
+    #     def render
+    #       options[:slug]    # access directly
+    #       slug              # access with delegate_options helper
+    #     end
+    #   end
+    def self.delegated_options(*opts)
+      opts.each do |opt|
+        define_method(opt) { options.fetch(opt) }
+      end
+    end
+
+    # @!endgroup
+
+    # @!group Extendable methods
+
+    # Key transformation logic (can be extended by ancestors)
+    # @param key [Symbol]
+    # @return [String] transformed key as string
+    # @example Camelizing all props in json
+    #   class ApplicationJson < BaseJson
+    #     def transform_key(key)
+    #       super.camelize(:lower)   # please always handle super gracefully
+    #     end
+    #   end
+    def transform_key(key)
+      raise(JsonStreamer::Error, "Keys should be Symbols only") unless key.is_a?(Symbol)
+
+      key.to_s.tr("?!", "")
+    end
+
+    # Value encoding logic (can be extended by ancestors)
+    # @param value [Object]
+    # @return [String] string to be written to json
+    # @example
+    #   class ApplicaiontJson < BaseJson
+    #     def encode_value(value)
+    #       case value
+    #       when BigDecimal then value.to_f    # e.g. we want those as floats, not as strings
+    #       else super
+    #       end
+    #     end
+    #   end
+    def encode_value(value)
+      case value
+      when String then value.to_str
+      when Integer, Float, TrueClass, FalseClass, NilClass then value
+      when Date then value.strftime("%F")
+      when Time then value.strftime("%FT%T.%L%:z")
+      else raise(JsonStreamer::Error, "Unsupported json encode class #{value.class}")
+      end
+    end
+
+    # @!endgroup
 
     private
 
@@ -170,20 +327,6 @@ module JsonStreamer
 
     def normalized_key(key)
       normalized_keys[key] ||= transform_key(key)
-    end
-
-    def transform_key(key)
-      key.instance_of?(Symbol) ? key.to_s.tr("?!", "") : raise(JsonStreamer::Error, "Keys should be Symbols only")
-    end
-
-    def encode_value(value)
-      case value
-      when String then value.to_str
-      when Integer, Float, TrueClass, FalseClass, NilClass then value
-      when Date then value.strftime("%F")
-      when Time then value.strftime("%FT%T.%L%:z")
-      else raise(JsonStreamer::Error, "Unsupported json encode class #{value.class}")
-      end
     end
   end
 end

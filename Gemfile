@@ -6,6 +6,7 @@ gemspec
 
 group :development, :test do
   gem "byebug"
+  gem "rake"
   gem "rspec"
   gem "rubocop"
   gem "rubocop-performance"
@@ -13,4 +14,6 @@ group :development, :test do
   gem "rubocop-rake"
   gem "rubocop-rspec"
   gem "rubocop-thread_safety"
+  gem "rubocop-yard"
+  gem "yard"
 end
