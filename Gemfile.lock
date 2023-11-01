@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json_streamer (0.1.0.pre)
+    json_streamer (0.1.0.pre.1)
       json
       oj
 
