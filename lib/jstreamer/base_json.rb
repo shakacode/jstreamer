@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-module JsonStreamer
+module Jstreamer
   # Provides main DSL and base class for json rendering.
   class BaseJson # rubocop:todo Metrics/ClassLength
     # TODO: add Scout instrumentation
     # include ScoutApm::Tracer
     # def self.generate(obj = NO_ARGUMENT, **opts)
-    #   instrument("JsonStreamer", name) do
+    #   instrument("Jstreamer", name) do
     #     new(**opts).call(obj).to_s
     #   end
     # end
@@ -171,8 +171,8 @@ module JsonStreamer
 
       cache_key = klass_opts.delete(:cache_key)
       cache_type = klass_opts.delete(:cache_type)
-      raise(JsonStreamer::Error, "No cache_key provided") if cache_type && cache_key.nil?
-      raise(JsonStreamer::Error, "No cache_type provided") if cache_key && cache_type.nil?
+      raise(Jstreamer::Error, "No cache_key provided") if cache_type && cache_key.nil?
+      raise(Jstreamer::Error, "No cache_type provided") if cache_key && cache_type.nil?
 
       case cache_type
       when :local
@@ -182,7 +182,7 @@ module JsonStreamer
       when nil
         execute_partial_directly(current_stream, klass, klass_obj, **klass_opts)
       else
-        raise(JsonStreamer::Error, "Unknown cache_type: #{cache_type}")
+        raise(Jstreamer::Error, "Unknown cache_type: #{cache_type}")
       end
     end
 
@@ -262,7 +262,7 @@ module JsonStreamer
     #     end
     #   end
     def transform_key(key)
-      raise(JsonStreamer::Error, "Keys should be Symbols only") unless key.is_a?(Symbol)
+      raise(Jstreamer::Error, "Keys should be Symbols only") unless key.is_a?(Symbol)
 
       key.to_s.tr("?!", "")
     end
@@ -285,7 +285,7 @@ module JsonStreamer
       when Integer, Float, TrueClass, FalseClass, NilClass then value
       when Date then value.strftime("%F")
       when Time then value.strftime("%FT%T.%L%:z")
-      else raise(JsonStreamer::Error, "Unsupported json encode class #{value.class}")
+      else raise(Jstreamer::Error, "Unsupported json encode class #{value.class}")
       end
     end
 
@@ -294,7 +294,7 @@ module JsonStreamer
     private
 
     def create_new_stream
-      JsonStreamer.create_new_stream
+      Jstreamer.create_new_stream
     end
 
     def execute_partial_directly(stream, klass, klass_obj, **klass_opts)

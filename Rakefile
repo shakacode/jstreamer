@@ -17,7 +17,7 @@ namespace :yard do
     `git checkout main`
 
     # keep clone in my own repo for publishing yard
-    `gh repo sync dzirtusss/json_streamer -b main --force`
-    `gh repo sync dzirtusss/json_streamer -b gh-pages --force`
+    `gh repo sync dzirtusss/jstreamer -b main --force`
+    `gh repo sync dzirtusss/jstreamer -b gh-pages --force`
   end
 end

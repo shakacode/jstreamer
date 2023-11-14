@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module JsonStreamer
+module Jstreamer
   # Rails extensions class - provides some helpers methods:
   # - view methods delegation
   # - view variables access

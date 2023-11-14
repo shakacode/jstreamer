@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# require "json_streamer/base_json"
+# require "jstreamer/base_json"
 
-describe JsonStreamer do
+describe Jstreamer do
   describe ".generate" do
     let(:template) do
-      Class.new(JsonStreamer::BaseJson) do
+      Class.new(Jstreamer::BaseJson) do
         def render
           prop(:abc, current_model)
         end

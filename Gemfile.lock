@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json_streamer (0.1.0.pre.1)
+    jstreamer (0.0.1)
       json
       oj
 
@@ -92,7 +92,7 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
-  json_streamer!
+  jstreamer!
   rake
   rspec
   rubocop

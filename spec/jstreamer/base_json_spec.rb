@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe JsonStreamer::BaseJson do
+describe Jstreamer::BaseJson do
   let(:basic_template) do
     Class.new(described_class) do
       def render
@@ -131,10 +131,10 @@ describe JsonStreamer::BaseJson do
 
       it "unsupported types" do
         expect { basic_template.generate(:some) }.
-          to raise_error(JsonStreamer::Error, "Unsupported json encode class Symbol")
+          to raise_error(Jstreamer::Error, "Unsupported json encode class Symbol")
 
         expect { basic_template.generate(BigDecimal("1")) }.
-          to raise_error(JsonStreamer::Error, "Unsupported json encode class BigDecimal")
+          to raise_error(Jstreamer::Error, "Unsupported json encode class BigDecimal")
       end
 
       it "custom override" do

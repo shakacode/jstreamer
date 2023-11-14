@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe JsonStreamer::RailsJson do
+describe Jstreamer::RailsJson do
   let(:template) do
     Class.new(described_class) do
       def render

@@ -1,8 +1,8 @@
-# json_streamer
+# jstreamer
 
 Renders JSON directly to a stream from ruby templates.
 
-[Full API Docs](http://dzirtusss.github.io/json_streamer/JsonStreamer.html)
+[Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
 
 ## Why?
 
@@ -30,12 +30,12 @@ not a JSON:API or some other serializer type.
 ```ruby
 # In your Gemfile
 
-gem "json_streamer"
+gem "jstreamer"
 ```
 
 ## Usage
 
-For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/json_streamer/JsonStreamer.html)
+For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
 
 ### Typical folder structure in Rails app
 
@@ -73,10 +73,10 @@ Just example, not required to follow.
     SomeMyJson.render_collection(models, view_context:)
   end
 
-# from JsonStreamer
+# from Jstreamer
 
-  json = JsonStreamer.generate(SomeJson, model, **options)       # render single object
-  json = JsonStreamer.generate([SomeMyJson], models, **options)  # render collection
+  json = Jstreamer.generate(SomeJson, model, **options)       # render single object
+  json = Jstreamer.generate([SomeMyJson], models, **options)  # render collection
 
 # low-level
 
@@ -155,13 +155,13 @@ end
 
 # Example JBuilder templates sugar helpers (e.g. of parallel usage)
 
-json.owner render_json_streamer_hash(UserJson, current_user)
-json.items render_json_streamer_hash([Item], items, some_options:)
+json.owner render_jstreamer_hash(UserJson, current_user)
+json.items render_jstreamer_hash([Item], items, some_options:)
 ```
 
 ### Template's DSL quick-reference
 
-For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/json_streamer/JsonStreamer.html)
+For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
 
 ```ruby
 
@@ -244,7 +244,7 @@ For full description and more detailed examles see [Full API Docs](http://dzirtu
     end
   end
 
-  JsonStreamer.generate([MainJson], models, **options)
+  Jstreamer.generate([MainJson], models, **options)
 
 # Push json directly (from string)
 
@@ -253,7 +253,7 @@ For full description and more detailed examles see [Full API Docs](http://dzirtu
 
 ### Helpers Quick-reference
 
-For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/json_streamer/JsonStreamer.html)
+For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
 
 ```ruby
 # Conditionally render views

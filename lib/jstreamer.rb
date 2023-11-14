@@ -3,8 +3,8 @@
 require "json"
 require "oj"
 
-require "json_streamer/base_json"
-require "json_streamer/rails_json"
+require "jstreamer/base_json"
+require "jstreamer/rails_json"
 
 # Renders JSON directly to a stream from ruby templates.
 # @example Default calling examples
@@ -66,14 +66,14 @@ require "json_streamer/rails_json"
 #       prop(:abc, view_context_get(:@notifications))      # variables integration
 #     end
 #   end
-module JsonStreamer
+module Jstreamer
   module_function
 
   # Default error class for errors raised by the gem
   class Error < StandardError; end
 
   # Generates json for a template (either sole or collection)
-  # @param template [Class] name of json_streamer class
+  # @param template [Class] name of jstreamer class
   # @param object [Object] object to render
   # @param options [kwargs]
   def generate(template, object = nil, **options)
