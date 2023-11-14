@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.9.34
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "README";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'>
+<h1 id="label-jstreamer">jstreamer</h1>
+
+<p>Renders JSON directly to a stream from ruby templates.</p>
+
+<p><a href="http://dzirtusss.github.io/jstreamer/Jstreamer.html">Full API Docs</a></p>
+
+<h2 id="label-Why-3F">Why?</h2>
+<ul><li>
+<p><strong>Fast by design. Renders directly to string buffer</strong> w/o building intermedium Hashes and calling <code>.to_json</code> on them. Minimal RAM footprint on huge JSONs. Several optimizations for re-usable tasks (e.g. keys, partials). Uses <a href="https://github.com/ohler55/oj">Oj</a> for low-level streaming.</p>
+</li><li>
+<p><strong>Simple ruby classes as templates</strong> (or call them view models). Template must have only a <code>render</code> method. All ruby power plus just a few well balanced DSL helpers. Easily extendable/configurable.</p>
+</li><li>
+<p><strong>Fully integrated with Rails</strong>. “Natural” seamless access to view and controller helpers like in other rails view templates.</p>
+</li><li>
+<p>Doesn't enforce data structure on generated JSON - can build any JSON in a JBuilder way, not a JSON:API or some other serializer type.</p>
+</li><li>
+<p>Many years in production environments.</p>
+</li><li>
+<p>Can be used in parallel with any other libraries - code refactoring can be done slowly and seamlessly.</p>
+</li><li>
+<p>Easier code maintenance, as, overall templates quantity is significantly decreased compared to typical solutions.</p>
+</li></ul>
+
+<h2 id="label-Installing">Installing</h2>
+
+<pre class="code ruby"><code class="ruby"><span class='comment'># In your Gemfile
+</span>
+<span class='id identifier rubyid_gem'>gem</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>jstreamer</span><span class='tstring_end'>&quot;</span></span>
+</code></pre>
+
+<h2 id="label-Usage">Usage</h2>
+
+<p>For full description and more detailed examles see <a href="http://dzirtusss.github.io/jstreamer/Jstreamer.html">Full API Docs</a></p>
+
+<h3 id="label-Typical+folder+structure+in+Rails+app">Typical folder structure in Rails app</h3>
+
+<p>Just example, not required to follow.</p>
+
+<pre class="code ruby"><code class="ruby">/app
+  /jsons
+    applictaion_json.rb  # ApplicationJson &lt; RailsJson   # for common configs and helpers
+    some_json.rb         # SomeJson &lt; ApplicationJson
+    other_json.rb        # OtherJson &lt; ApplicationJson
+</code></pre>
+
+<h3 id="label-Calling">Calling</h3>
+
+<pre class="code ruby"><code class="ruby"><span class='comment'># As plain rendering
+</span>
+  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='label'>notifications:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>view:</span> <span class='symbol'>:api</span><span class='rparen'>)</span>  <span class='comment'># with options
+</span>
+  <span class='comment'># collections are rarely or never needed to be called directly
+</span>  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_generate_collection'>generate_collection</span><span class='lparen'>(</span><span class='id identifier rubyid_models'>models</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_generate_collection'>generate_collection</span><span class='lparen'>(</span><span class='id identifier rubyid_models'>models</span><span class='comma'>,</span> <span class='label'>notifications:</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='label'>view:</span> <span class='symbol'>:api</span><span class='rparen'>)</span>  <span class='comment'># with options
+</span>
+<span class='comment'># from Rails controller actions
+</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_some_action'>some_action</span>
+    <span class='comment'># sugar for render(json: SomeMyJson.generate(model, view_context:))
+</span>    <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_render'>render</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='label'>view_context:</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_some_action'>some_action</span>
+    <span class='comment'># sugar for render(json: SomeMyJson.generate_collection(models, view_context:))
+</span>    <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_render_collection'>render_collection</span><span class='lparen'>(</span><span class='id identifier rubyid_models'>models</span><span class='comma'>,</span> <span class='label'>view_context:</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+<span class='comment'># from Jstreamer
+</span>
+  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Jstreamer.html" title="Jstreamer (module)">Jstreamer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_generate'><span class='object_link'><a href="Jstreamer.html#generate-class_method" title="Jstreamer.generate (method)">generate</a></span></span><span class='lparen'>(</span><span class='const'>SomeJson</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>       <span class='comment'># render single object
+</span>  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Jstreamer.html" title="Jstreamer (module)">Jstreamer</a></span></span><span class='period'>.</span><span class='id identifier rubyid_generate'><span class='object_link'><a href="Jstreamer.html#generate-class_method" title="Jstreamer.generate (method)">generate</a></span></span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='const'>SomeMyJson</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_models'>models</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>  <span class='comment'># render collection
+</span>
+<span class='comment'># low-level
+</span>
+  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_call'>call</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
+  <span class='id identifier rubyid_json'>json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_call_collection'>call_collection</span><span class='lparen'>(</span><span class='id identifier rubyid_models'>models</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
+</code></pre>
+
+<h3 id="label-Template+examples">Template examples</h3>
+
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>SomeMyJson</span> <span class='op'>&lt;</span> <span class='const'>ApplicationJson</span>
+  <span class='const'>COMMON_PROPS</span> <span class='op'>=</span> <span class='qsymbols_beg'>%i[</span><span class='tstring_content'>id</span><span class='words_sep'> </span><span class='tstring_content'>name</span><span class='words_sep'> </span><span class='tstring_content'>title</span><span class='tstring_end'>]</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_render'>render</span>
+    <span class='id identifier rubyid_from'>from</span><span class='lparen'>(</span><span class='id identifier rubyid_current_model'>current_model</span><span class='comma'>,</span> <span class='const'>COMMON_PROPS</span><span class='rparen'>)</span>               <span class='comment'># prop names are similar
+</span>    <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:description</span><span class='comma'>,</span> <span class='id identifier rubyid_current_model'>current_model</span><span class='period'>.</span><span class='id identifier rubyid_summary'>summary</span><span class='rparen'>)</span>       <span class='comment'># prop name is different
+</span>    <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:fetch_url</span><span class='comma'>,</span> <span class='id identifier rubyid_some_edit_url'>some_edit_url</span><span class='lparen'>(</span><span class='id identifier rubyid_current_model'>current_model</span><span class='rparen'>)</span><span class='rparen'>)</span>  <span class='comment'># calculated prop
+</span>
+    <span class='id identifier rubyid_partial'>partial</span><span class='lparen'>(</span><span class='symbol'>:items</span><span class='comma'>,</span> <span class='const'>ItemsJson</span><span class='comma'>,</span> <span class='id identifier rubyid_current_model'>current_model</span><span class='period'>.</span><span class='id identifier rubyid_items'>items</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_array'>array</span><span class='lparen'>(</span><span class='symbol'>:notifications</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:notifications</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_notification'>notification</span><span class='op'>|</span>
+      <span class='id identifier rubyid_from'>from</span><span class='lparen'>(</span><span class='id identifier rubyid_notification'>notification</span><span class='comma'>,</span> <span class='symbol'>:name</span><span class='comma'>,</span> <span class='symbol'>:level</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:idx</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span><span class='rparen'>)</span>                     <span class='comment'># e.g. array index
+</span>    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_object'>object</span><span class='lparen'>(</span><span class='symbol'>:api_props</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_view?'>view?</span><span class='lparen'>(</span><span class='symbol'>:api</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_api_props'>api_props</span>
+    <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:some_api_specific_prop</span><span class='comma'>,</span> <span class='int'>123</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='kw'>class</span> <span class='const'>ItemJson</span> <span class='op'>&lt;</span> <span class='const'>ApplicationJson</span>
+  <span class='const'>DEFAULT_PROPS</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>%[</span><span class='tstring_content'>id name description price</span><span class='tstring_end'>]</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_render'>render</span>
+    <span class='id identifier rubyid_from'>from</span><span class='lparen'>(</span><span class='id identifier rubyid_current_model'>current_model</span><span class='comma'>,</span> <span class='const'>DEFAULT_PROPS</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+</code></pre>
+
+<h3 id="label-Application+config+example">Application config example</h3>
+
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>ApplicatoinJson</span> <span class='op'>&lt;</span> <span class='const'>BaseJson</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_transform_key'>transform_key</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='rparen'>)</span>
+    <span class='kw'>super</span><span class='period'>.</span><span class='id identifier rubyid_camelize'>camelize</span><span class='lparen'>(</span><span class='symbol'>:lower</span><span class='rparen'>)</span>        <span class='comment'># camelize all keys
+</span>  <span class='kw'>end</span>
+<span class='kw'>end</span>
+</code></pre>
+
+<h3 id="label-Rails+integration">Rails integration</h3>
+
+<pre class="code ruby"><code class="ruby"><span class='comment'># template
+</span><span class='kw'>class</span> <span class='const'>SomeMyJson</span> <span class='op'>&lt;</span> <span class='const'>ApplicationJson</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_render'>render</span>
+    <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:user_id</span><span class='comma'>,</span> <span class='id identifier rubyid_current_user'>current_user</span><span class='period'>.</span><span class='id identifier rubyid_id'>id</span><span class='rparen'>)</span>                    <span class='comment'># controller methods integration
+</span>    <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:profile_path</span><span class='comma'>,</span> <span class='id identifier rubyid_profile_path'>profile_path</span><span class='lparen'>(</span><span class='id identifier rubyid_current_user'>current_user</span><span class='rparen'>)</span><span class='rparen'>)</span>    <span class='comment'># view helpers integration
+</span>    <span class='id identifier rubyid_prop'>prop</span><span class='lparen'>(</span><span class='symbol'>:abc</span><span class='comma'>,</span> <span class='id identifier rubyid_view_context_get'>view_context_get</span><span class='lparen'>(</span><span class='symbol'>:@notifications</span><span class='rparen'>)</span><span class='rparen'>)</span>      <span class='comment'># variables integration
+</span>  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='comment'># api controller
+</span><span class='kw'>class</span> <span class='const'>MyApiController</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_show'>show</span>
+    <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_render'>render</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='label'>view_context:</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='comment'># page controller
+</span><span class='kw'>class</span> <span class='const'>MyPageController</span>
+  <span class='kw'>def</span> <span class='id identifier rubyid_show'>show</span>
+    <span class='ivar'>@props_json</span> <span class='op'>=</span> <span class='const'>SomeMyJson</span><span class='period'>.</span><span class='id identifier rubyid_generate'>generate</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='label'>view_context:</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Example JBuilder templates sugar helpers (e.g. of parallel usage)
+</span>
+<span class='id identifier rubyid_json'>json</span><span class='period'>.</span><span class='id identifier rubyid_owner'>owner</span> <span class='id identifier rubyid_render_jstreamer_hash'>render_jstreamer_hash</span><span class='lparen'>(</span><span class='const'>UserJson</span><span class='comma'>,</span> <span class='id identifier rubyid_current_user'>current_user</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_json'>json</span><span class='period'>.</span><span class='id identifier rubyid_items'>items</span> <span class='id identifier rubyid_render_jstreamer_hash'>render_jstreamer_hash</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='const'>Item</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_items'>items</span><span class='comma'>,</span> <span class='label'>some_options:</span><span class='rparen'>)</span>
+</code></pre>
+
+<h3 id="label-Template-27s+DSL+quick-reference">Template’s DSL quick-reference</h3>
+
+<p>For full description and more detailed examles see <a href="http://dzirtusss.github.io/jstreamer/Jstreamer.html">Full API Docs</a></p>
+
+<pre class="code ruby"><code class="ruby">
+# Push a single property to stream
+
+  prop(:key, value)
+
+# Extract properties from model or hash and push to stream
+
+  # inline
+  from(model, :key1, :key2)
+
+  # with array
+  KEYS = %i[key1 key2]
+
+  from(model, KEYS)
+  from(model, *KEYS)
+
+# Push object to stream
+
+  # with method
+  object(:key)
+
+  def key
+    ...
+  end
+
+  # with block
+  object(:key) do
+    ...
+  end
+
+# Push array to stream
+
+  # with method
+  array(:key, array_of_items)
+
+  def key(item)
+    ...
+  end
+
+  # with block
+  array(:key, array_of_items) do |item|
+    ...
+  end
+
+# Push partial (another json streamer class) to stream
+
+  # typical usage for a single object streaming
+  class MainJson
+    def render
+      partial(:item, ItemJson, current_model.item, **options)
+    end
+  end
+
+  class ItemJson
+    def render
+      prop(...)
+    end
+  end
+
+  # collection
+  class MainJson
+    def render
+      partial(:items, [ItemJson], current_model.items, **options)
+    end
+  end
+
+  # collection with caching - uses cache_type: :local (memoization)
+  class MainJson
+    def render
+      partial(:items, [ItemJson], current_model.items, cache_key:, cache_type: :local, **options)
+    end
+  end
+
+  # more complex - uses lambda when need to skip execution
+  class MainJson
+    def render
+      partial(:user, UserJson, -&gt; { current_model.user.decorate }, cache_key:, cache_type: :local, **options)
+    end
+  end
+
+  Jstreamer.generate([MainJson], models, **options)
+
+# Push json directly (from string)
+
+  merge_json(json)
+</code></pre>
+
+<h3 id="label-Helpers+Quick-reference">Helpers Quick-reference</h3>
+
+<p>For full description and more detailed examles see <a href="http://dzirtusss.github.io/jstreamer/Jstreamer.html">Full API Docs</a></p>
+
+<pre class="code ruby"><code class="ruby"># Conditionally render views
+  def render
+    ...
+
+    if view?(:api_v1, :api_v2)
+      ...
+    end
+  end
+
+# Delegate methods to options
+  class SomeJson &lt; ApplicationJson
+    delegated_options :slug
+
+    def render
+      options[:slug]
+      slug            # same as above
+    end
+  end
+</code></pre>
+
+<h2 id="label-License">License</h2>
+
+<p><a href="LICENSE">MIT</a></p>
+</div></div>
+
+      <div id="footer">
+  Generated on Tue Nov 14 21:15:27 2023 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.34 (ruby-3.1.2).
+</div>
+
+    </div>
+  </body>
+</html>
