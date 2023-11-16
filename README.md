@@ -7,23 +7,27 @@ Renders JSON directly to a stream from ruby templates.
 ## Why?
 
 - **Fast by design. Renders directly to string buffer** w/o building intermedium Hashes and calling `.to_json` on them.
-Minimal RAM footprint on huge JSONs. Several optimizations for re-usable tasks (e.g. keys, partials).
+Minimal RAM footprint on huge JSONs.
+Several optimizations for re-usable tasks (e.g. keys, partials).
 Uses [Oj](https://github.com/ohler55/oj) for low-level streaming.
 
-- **Simple ruby classes as templates** (or call them view models). Template must have only a `render` method.
-All ruby power plus just a few well balanced DSL helpers. Easily extendable/configurable.
+- **Simple ruby classes as templates** (or call them view models).
+The template must have only a `render` method.
+All Ruby power plus just a few well-balanced DSL helpers.
+Easily extendable/configurable.
 
-- **Fully integrated with Rails**. "Natural" seamless access to view and controller helpers like in other
+- **Fully integrated with Rails**.
+"Natural" seamless access to view and controller helpers like in other
 rails view templates.
 
 - Doesn't enforce data structure on generated JSON - can build any JSON in a JBuilder way,
-not a JSON:API or some other serializer type.
+not a `JSON:API`` or some other serializer type.
 
 - Many years in production environments.
 
 - Can be used in parallel with any other libraries - code refactoring can be done slowly and seamlessly.
 
-- Easier code maintenance, as, overall templates quantity is significantly decreased compared to typical solutions.
+- Easier code maintenance, as, overall template quantity is significantly decreased compared to typical solutions.
 
 ## Installing
 
@@ -35,11 +39,12 @@ gem "jstreamer"
 
 ## Usage
 
-For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
+For full description and more detailed examples see
+[Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html).
 
 ### Typical folder structure in Rails app
 
-Just example, not required to follow.
+Just an example, not required to follow.
 
 ```sh
 /app
@@ -161,10 +166,10 @@ json.items render_jstreamer_hash([Item], items, some_options:)
 
 ### Template's DSL quick-reference
 
-For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
+For full description and more detailed examples see
+[Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html).
 
 ```ruby
-
 # Push a single property to stream
 
   prop(:key, value)
@@ -253,7 +258,8 @@ For full description and more detailed examles see [Full API Docs](http://dzirtu
 
 ### Helpers Quick-reference
 
-For full description and more detailed examles see [Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html)
+For full description and more detailed examples see
+[Full API Docs](http://dzirtusss.github.io/jstreamer/Jstreamer.html).
 
 ```ruby
 # Conditionally render views
