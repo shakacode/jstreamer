@@ -1,0 +1,24 @@
+name: Rubocop
+
+on: [push, pull_request]
+
+jobs:
+  rubocop:
+    name: Rubocop
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ['3.0']
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Ruby rubocop
+        run: bundle exec rubocop
