@@ -3,16 +3,20 @@ name: Ruby specs
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: Ruby specs
-    runs-on: ubuntu-latest
+  rubocop:
+    name: Rubocop
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ['2.7', '3.2']
 
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: Ruby specs
-        run: bundle exec rspec
+      - name: Ruby rubocop
+        run: bundle exec rubocop
