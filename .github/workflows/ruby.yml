@@ -5,19 +5,13 @@ on: [push, pull_request]
 jobs:
   test:
     name: Ruby specs
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        ruby: ['2.7', '3.0']
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
+          ruby-version: '3.0'
           bundler-cache: true
 
       - name: Ruby specs
