@@ -44,7 +44,7 @@ Just example, not required to follow.
 ```sh
 /app
   /jsons
-    applictaion_json.rb  # ApplicationJson < RailsJson   # for common configs and helpers
+    application_json.rb  # ApplicationJson < RailsJson   # for common configs and helpers
     some_json.rb         # SomeJson < ApplicationJson
     other_json.rb        # OtherJson < ApplicationJson
 ```
