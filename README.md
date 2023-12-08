@@ -21,7 +21,7 @@ Easily extendable/configurable.
 rails view templates.
 
 - Doesn't enforce data structure on generated JSON - can build any JSON in a JBuilder way,
-not a `JSON:API`` or some other serializer type.
+not a `JSON:API` or some other serializer type.
 
 - Many years in production environments.
 
