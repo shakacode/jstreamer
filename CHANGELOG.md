@@ -10,4 +10,12 @@ Please follow the recommendations outlined at [keepachangelog.com](https://keepa
 
 ## [Unreleased]
 
+### [0.0.2]
+#### Fixed
+- XSS injection issues [PR 5](https://github.com/shakacode/jstreamer/pull/5)
+
+#### Improved
+- docs formatting and typos [PR 4](https://github.com/shakacode/jstreamer/pull/4)
+
+### [0.0.1]
 - Initial release
