@@ -3,8 +3,8 @@ name: Ruby specs
 on: [push, pull_request]
 
 jobs:
-  rubocop:
-    name: Rubocop
+  ruby:
+    name: Ruby
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -18,5 +18,5 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: Ruby rubocop
-        run: bundle exec rubocop
+      - name: Run RSpec
+        run: bundle exec rspec
