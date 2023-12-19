@@ -87,6 +87,6 @@ module Jstreamer
   # Creates new stream (low-level engine)
   # @return stream low-level engine
   def create_new_stream
-    Oj::StringWriter.new
+    Oj::StringWriter.new(escape_mode: :xss_safe)
   end
 end

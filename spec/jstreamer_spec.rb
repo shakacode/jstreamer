@@ -29,5 +29,23 @@ describe Jstreamer do
     it "retruns stream" do
       expect(described_class.create_new_stream).not_to be_nil
     end
+
+    it "handles Unicode XSS injections" do
+      stream = described_class.create_new_stream
+
+      stream.push_value("\u2028\u2029\u0000", "x")
+      result = stream.to_s.split(":").last
+
+      expect(result).to eq('"\\u2028\\u2029\\u0000"')
+    end
+
+    it "handles HTML XSS injections" do
+      stream = described_class.create_new_stream
+
+      stream.push_value("<>&", "x")
+      result = stream.to_s.split(":").last
+
+      expect(result).to eq('"\\u003c\\u003e\\u0026"')
+    end
   end
 end
